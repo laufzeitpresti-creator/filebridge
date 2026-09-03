@@ -1,0 +1,13 @@
+---
+description: Filebridge UI-Stack — shadcn, Motion, Kokonut, Bklit
+alwaysApply: true
+---
+
+# Filebridge UI-Stack
+
+- Basis: vorhandene shadcn-Komponenten in `components/ui`.
+- Animationen: `import { motion } from "motion/react"`.
+- Registries in `components.json`: `@kokonutui`, `@bklit`.
+- Neue UI über CLI: `npx shadcn@latest add @kokonutui/<name>` oder `@bklit/<chart>`.
+- Keine dekorativen Kokonut-Effekte (Particle, Glitch, Matrix). Motion nur für klares Feedback (Transfer-Fortschritt, Dialog-Enter).
+- Bklit erst, wenn echte Transfer- oder Nutzungsdaten visualisiert werden.
