@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
+import Loader from "@/components/kokonutui/loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -42,7 +44,7 @@ function formatBytes(value: number | null) {
 }
 
 export function JobList() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<Job[] | null>(null);
 
   async function load() {
     const response = await fetch("/api/transfers");
@@ -65,6 +67,10 @@ export function JobList() {
     }
     toast.success("Transfer wird fortgesetzt");
     await load();
+  }
+
+  if (jobs === null) {
+    return <Loader size="sm" subtitle="Status kommt in Kürze." title="Jobs laden" />;
   }
 
   if (jobs.length === 0) {
@@ -92,10 +98,12 @@ export function JobList() {
           return (
             <TableRow key={job.id}>
               <TableCell>
-                <div className="font-medium">{job.fileName}</div>
-                {job.error ? (
-                  <p className="mt-1 text-xs text-destructive">{job.error}</p>
-                ) : null}
+                <motion.div animate={{ opacity: 1 }} initial={{ opacity: 0.65 }} transition={{ duration: 0.2 }}>
+                  <div className="font-medium">{job.fileName}</div>
+                  {job.error ? (
+                    <p className="mt-1 text-xs text-destructive">{job.error}</p>
+                  ) : null}
+                </motion.div>
               </TableCell>
               <TableCell>
                 <Badge variant={job.status === "failed" ? "destructive" : "secondary"}>
@@ -111,12 +119,12 @@ export function JobList() {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   {job.downloadUrl ? (
-                    <Button size="sm" variant="outline" asChild>
+                    <Button asChild size="sm" variant="outline">
                       <a href={job.downloadUrl}>iPhone-Link</a>
                     </Button>
                   ) : null}
                   {(job.status === "failed" || job.status === "queued") && (
-                    <Button size="sm" variant="outline" onClick={() => retry(job.id)}>
+                    <Button onClick={() => retry(job.id)} size="sm" variant="outline">
                       Erneut versuchen
                     </Button>
                   )}

@@ -1,10 +1,11 @@
 import { ConnectionsClient } from "./connections-client";
+import { FadeIn } from "@/components/fade-in";
 import { oauthFlags } from "@/lib/config";
 import { Suspense } from "react";
 
 export default function ConnectionsPage() {
   return (
-    <div className="grid gap-6">
+    <FadeIn className="grid gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Verbindungen</h1>
         <p className="mt-1 text-muted-foreground">
@@ -14,6 +15,6 @@ export default function ConnectionsPage() {
       <Suspense>
         <ConnectionsClient oauth={oauthFlags()} />
       </Suspense>
-    </div>
+    </FadeIn>
   );
 }

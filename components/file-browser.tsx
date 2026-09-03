@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronLeftIcon, FileIcon, FolderIcon } from "lucide-react";
+import Loader from "@/components/kokonutui/loader";
 import { Button } from "@/components/ui/button";
 import type { FileEntry } from "@/lib/connectors/types";
 
@@ -73,7 +74,12 @@ export function FileBrowser({ connectionId, mode, onSelect, selectedId }: Props)
         </p>
       </div>
       {loading ? (
-        <p className="px-3 py-6 text-sm text-muted-foreground">Laden…</p>
+        <Loader
+          className="py-8"
+          size="sm"
+          subtitle="Ordnerinhalt kommt."
+          title="Dateien laden"
+        />
       ) : error ? (
         <p className="px-3 py-6 text-sm text-destructive">{error}</p>
       ) : (

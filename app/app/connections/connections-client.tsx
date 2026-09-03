@@ -10,10 +10,11 @@ import {
   SftpForm,
   WebDavForm,
 } from "@/components/connection-forms";
+import HoldButton from "@/components/kokonutui/hold-button";
+import SmoothTab from "@/components/kokonutui/smooth-tab";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONNECTORS } from "@/lib/connectors/catalog";
 
 type Connection = {
@@ -85,108 +86,127 @@ export function ConnectionsClient({ oauth }: { oauth: OauthFlags }) {
   const clouds = CONNECTORS.filter((item) => item.group === "cloud");
 
   return (
-    <Tabs defaultValue="cloud">
-      <TabsList>
-        <TabsTrigger value="cloud">Clouds</TabsTrigger>
-        <TabsTrigger value="server">Server</TabsTrigger>
-        <TabsTrigger value="device">Gerät & Links</TabsTrigger>
-      </TabsList>
+    <div className="grid gap-6">
+      <SmoothTab
+        defaultTabId="cloud"
+        hidePreview
+        items={[
+          {
+            id: "cloud",
+            title: "Clouds",
+            color: "bg-foreground",
+            content: (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {clouds.map((item) => {
+                  const ready = oauth[item.kind as keyof OauthFlags];
+                  return (
+                    <Card key={item.kind}>
+                      <CardHeader>
+                        <CardTitle>{item.label}</CardTitle>
+                        <CardDescription>{item.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {ready ? (
+                          <Button asChild>
+                            <a href={oauthHref[item.kind]}>{item.label} verbinden</a>
+                          </Button>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {item.kind === "onedrive"
+                              ? "MICROSOFT_CLIENT_ID und MICROSOFT_CLIENT_SECRET setzen."
+                              : `${item.kind.toUpperCase()}_CLIENT_ID und SECRET in .env.local setzen.`}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ),
+          },
+          {
+            id: "server",
+            title: "Server",
+            color: "bg-foreground",
+            content: (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>SFTP</CardTitle>
+                    <CardDescription>SSH auf VPS, NAS, Hetzner.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <SftpForm onCreated={() => void load()} />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>FTP / FTPS</CardTitle>
+                    <CardDescription>Klassische Hosting-Zugänge.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FtpForm onCreated={() => void load()} />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>WebDAV</CardTitle>
+                    <CardDescription>Nextcloud, ownCloud, Dateien-App auf dem iPhone.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <WebDavForm onCreated={() => void load()} />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>S3 / R2 / MinIO</CardTitle>
+                    <CardDescription>Object Storage, S3-kompatibel.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <S3Form onCreated={() => void load()} />
+                  </CardContent>
+                </Card>
+              </div>
+            ),
+          },
+          {
+            id: "device",
+            title: "Gerät & Links",
+            color: "bg-foreground",
+            content: (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Dieses Gerät</CardTitle>
+                    <CardDescription>
+                      Im Transfer-Wizard eine Datei vom Computer oder Handy hochladen. Wird automatisch angelegt.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Link für iPhone & Co.</CardTitle>
+                    <CardDescription>
+                      Ziel „Link für iPhone“ wählen. Danach erscheint in den Jobs ein Download-Link für 7 Tage.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>HTTP(S)-URL</CardTitle>
+                    <CardDescription>Eine Datei direkt per öffentlichem Link holen.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <HttpForm onCreated={() => void load()} />
+                  </CardContent>
+                </Card>
+              </div>
+            ),
+          },
+        ]}
+      />
 
-      <TabsContent value="cloud" className="grid gap-4 sm:grid-cols-2">
-        {clouds.map((item) => {
-          const ready = oauth[item.kind as keyof OauthFlags];
-          return (
-            <Card key={item.kind}>
-              <CardHeader>
-                <CardTitle>{item.label}</CardTitle>
-                <CardDescription>{item.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {ready ? (
-                  <Button asChild>
-                    <a href={oauthHref[item.kind]}>{item.label} verbinden</a>
-                  </Button>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {item.kind === "onedrive"
-                      ? "MICROSOFT_CLIENT_ID und MICROSOFT_CLIENT_SECRET setzen."
-                      : `${item.kind.toUpperCase()}_CLIENT_ID und SECRET in .env.local setzen.`}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </TabsContent>
-
-      <TabsContent value="server" className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>SFTP</CardTitle>
-            <CardDescription>SSH auf VPS, NAS, Hetzner.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SftpForm onCreated={() => void load()} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>FTP / FTPS</CardTitle>
-            <CardDescription>Klassische Hosting-Zugänge.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FtpForm onCreated={() => void load()} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>WebDAV</CardTitle>
-            <CardDescription>Nextcloud, ownCloud, Dateien-App auf dem iPhone.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <WebDavForm onCreated={() => void load()} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>S3 / R2 / MinIO</CardTitle>
-            <CardDescription>Object Storage, S3-kompatibel.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <S3Form onCreated={() => void load()} />
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="device" className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Dieses Gerät</CardTitle>
-            <CardDescription>
-              Im Transfer-Wizard eine Datei vom Computer oder Handy hochladen. Wird automatisch angelegt.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Link für iPhone & Co.</CardTitle>
-            <CardDescription>
-              Ziel „Link für iPhone“ wählen. Danach erscheint in den Jobs ein Download-Link für 7 Tage.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>HTTP(S)-URL</CardTitle>
-            <CardDescription>Eine Datei direkt per öffentlichem Link holen.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <HttpForm onCreated={() => void load()} />
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <Card className="mt-6">
+      <Card>
         <CardHeader>
           <CardTitle>Gespeicherte Verbindungen</CardTitle>
         </CardHeader>
@@ -196,21 +216,21 @@ export function ConnectionsClient({ oauth }: { oauth: OauthFlags }) {
           ) : (
             items.map((item) => (
               <div
-                key={item.id}
                 className="flex flex-col gap-2 rounded-lg border px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                key={item.id}
               >
                 <div>
                   <p className="font-medium">{item.name}</p>
                   <Badge variant="secondary">{labelFor(item.kind)}</Badge>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => test(item.id)}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button onClick={() => test(item.id)} size="sm" variant="outline">
                     Testen
                   </Button>
                   {item.kind !== "local" && item.kind !== "share" ? (
-                    <Button size="sm" variant="destructive" onClick={() => remove(item.id)}>
+                    <HoldButton holdDuration={1100} onClick={() => void remove(item.id)} size="sm">
                       Entfernen
-                    </Button>
+                    </HoldButton>
                   ) : null}
                 </div>
               </div>
@@ -218,7 +238,7 @@ export function ConnectionsClient({ oauth }: { oauth: OauthFlags }) {
           )}
         </CardContent>
       </Card>
-    </Tabs>
+    </div>
   );
 }
 
